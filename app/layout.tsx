@@ -1,18 +1,13 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-import { CartProvider } from "@/contexts/cart-context"
-import { ProductsProvider } from "@/contexts/products-context"
-import Navbar from "@/components/navbar"
-import PageLoader from "@/components/page-loader"
-import "./globals.css"
+import type { Metadata } from 'next'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
+import { Analytics } from '@vercel/analytics/next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: "AC BIG APPLE - Premier Wholesale Beauty & Spa Essentials",
-  description:
-    "Your premier wholesale destination in Lagos for luxurious, quality beauty and spa essentials at unbeatable prices",
-  generator: "v0.app",
+  title: 'v0 App',
+  description: 'Created with v0',
+  generator: 'v0.app',
 }
 
 export default function RootLayout({
@@ -32,13 +27,8 @@ html {
         `}</style>
       </head>
       <body>
-        <ProductsProvider>
-          <CartProvider>
-            <PageLoader />
-            <Navbar />
-            {children}
-          </CartProvider>
-        </ProductsProvider>
+        {children}
+        <Analytics />
       </body>
     </html>
   )
