@@ -121,11 +121,41 @@ export default function ProductManagement({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+          <p className="text-gray-600">Manage your wholesale inventory and pricing</p>
+        </div>
         <Button onClick={() => setShowAddForm(true)} className="bg-green-500 hover:bg-green-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Product
         </Button>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-green-800">Total Products</h3>
+          <p className="text-2xl font-bold text-green-900">{products.length}</p>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-800">Categories</h3>
+          <p className="text-2xl font-bold text-blue-900">{new Set(products.map((p) => p.category)).size}</p>
+        </div>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-purple-800">Avg. Price</h3>
+          <p className="text-2xl font-bold text-purple-900">
+            ₦
+            {products.length > 0
+              ? Math.round(products.reduce((sum, p) => sum + p.price, 0) / products.length).toLocaleString()
+              : 0}
+          </p>
+        </div>
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-orange-800">Total Value</h3>
+          <p className="text-2xl font-bold text-orange-900">
+            ₦{products.reduce((sum, p) => sum + p.price, 0).toLocaleString()}
+          </p>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
@@ -167,12 +197,12 @@ export default function ProductManagement({
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label htmlFor="price" className="text-green-900">
-                        Price ($)
+                        Wholesale Price (₦)
                       </Label>
                       <Input
                         id="price"
                         type="number"
-                        step="0.01"
+                        step="100"
                         value={formData.price}
                         onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                         className="border-green-200 focus:border-green-500"
@@ -181,12 +211,12 @@ export default function ProductManagement({
                     </div>
                     <div>
                       <Label htmlFor="originalPrice" className="text-green-900">
-                        Original Price ($)
+                        Retail Price (₦)
                       </Label>
                       <Input
                         id="originalPrice"
                         type="number"
-                        step="0.01"
+                        step="100"
                         value={formData.originalPrice}
                         onChange={(e) => setFormData((prev) => ({ ...prev, originalPrice: e.target.value }))}
                         className="border-green-200 focus:border-green-500"
@@ -260,11 +290,16 @@ export default function ProductManagement({
 
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-green-600">${product.price}</span>
+                  <span className="font-bold text-green-600">₦{product.price.toLocaleString()}</span>
                   {product.originalPrice > product.price && (
-                    <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
+                    <span className="text-sm text-gray-500 line-through">
+                      ₦{product.originalPrice.toLocaleString()}
+                    </span>
                   )}
                 </div>
+                <span className="text-xs text-green-600 font-medium">
+                  Save ₦{(product.originalPrice - product.price).toLocaleString()}
+                </span>
               </div>
 
               <div className="flex gap-2">

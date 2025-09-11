@@ -60,7 +60,7 @@ export default function CartDrawer() {
                           <h3 className="font-medium text-sm text-gray-900 truncate">{item.name}</h3>
                           <p className="text-xs text-gray-500 mt-1">{item.category}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="font-semibold text-green-600">${item.price}</span>
+                            <span className="font-semibold text-green-600">₦{item.price.toLocaleString()}</span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -93,7 +93,9 @@ export default function CartDrawer() {
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        <span className="font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-semibold text-gray-900">
+                          ₦{(item.price * item.quantity).toLocaleString()}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -107,7 +109,7 @@ export default function CartDrawer() {
             <div className="border-t p-6 space-y-4">
               <div className="flex items-center justify-between text-lg font-semibold">
                 <span>Total:</span>
-                <span className="text-green-600">${getTotalPrice().toFixed(2)}</span>
+                <span className="text-green-600">₦{getTotalPrice().toLocaleString()}</span>
               </div>
               <Button
                 onClick={() => setShowCheckout(true)}

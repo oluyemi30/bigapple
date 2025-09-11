@@ -17,7 +17,7 @@ export default function ProductsSection({ showFilters = true }: ProductsSectionP
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000])
   const { addItem, openCart } = useCartHelpers()
   const { products } = useProducts()
 
@@ -99,11 +99,13 @@ export default function ProductsSection({ showFilters = true }: ProductsSectionP
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-green-600">${product.price}</span>
-                      <span className="text-sm text-gray-500 line-through">Retail: ${product.originalPrice}</span>
+                      <span className="text-xl font-bold text-green-600">₦{product.price.toLocaleString()}</span>
+                      <span className="text-sm text-gray-500 line-through">
+                        Retail: ₦{product.originalPrice.toLocaleString()}
+                      </span>
                     </div>
                     <span className="text-xs text-green-600 font-semibold">
-                      Save ${(product.originalPrice - product.price).toFixed(2)}
+                      Save ₦{(product.originalPrice - product.price).toLocaleString()}
                     </span>
                   </div>
 
@@ -126,7 +128,7 @@ export default function ProductsSection({ showFilters = true }: ProductsSectionP
               onClick={() => {
                 setSearchTerm("")
                 setSelectedCategory("")
-                setPriceRange([0, 2000])
+                setPriceRange([0, 100000])
               }}
               variant="outline"
               className="border-green-200 text-green-700 hover:bg-green-50"

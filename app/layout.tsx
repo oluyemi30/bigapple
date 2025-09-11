@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { CartProvider } from "@/contexts/cart-context"
 import { ProductsProvider } from "@/contexts/products-context"
 import Navbar from "@/components/navbar"
+import PageLoader from "@/components/page-loader"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ html {
       <body>
         <ProductsProvider>
           <CartProvider>
+            <PageLoader />
             <Navbar />
             {children}
           </CartProvider>

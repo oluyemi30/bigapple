@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from "next/image"
-import { X, CreditCard, Truck, User, Lock } from "lucide-react"
+import { X, Truck, User, MessageCircle } from "lucide-react"
 
 interface CheckoutModalProps {
   isOpen: boolean
@@ -34,21 +34,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     shippingCity: "",
     shippingState: "",
     shippingZip: "",
-    shippingCountry: "US",
-
-    // Billing Address
-    sameAsShipping: true,
-    billingAddress: "",
-    billingCity: "",
-    billingState: "",
-    billingZip: "",
-    billingCountry: "US",
-
-    // Payment
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    cardName: "",
+    shippingCountry: "Nigeria",
 
     // Order Notes
     orderNotes: "",
@@ -61,17 +47,54 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const handleSubmitOrder = async () => {
     setIsProcessing(true)
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    // Create WhatsApp message with order details
+    const orderDetails = items
+      .map((item) => `• ${item.name} (Qty: ${item.quantity}) - ₦${(item.price * item.quantity).toFixed(2)}`)
+      .join("\n")
+
+    const whatsappMessage = `🛍️ *NEW ORDER FROM AC BIG APPLE*
+
+👤 *Customer Details:*
+Name: ${formData.firstName} ${formData.lastName}
+Phone: ${formData.phone}
+Email: ${formData.email}
+
+📍 *Delivery Address:*
+${formData.shippingAddress}
+${formData.shippingCity}, ${formData.shippingState} ${formData.shippingZip}
+${formData.shippingCountry}
+
+🛒 *Order Items:*
+${orderDetails}
+
+💰 *Order Summary:*
+Subtotal: ₦${getTotalPrice().toFixed(2)}
+Total Items: ${getTotalItems()}
+*Total Amount: ₦${getTotalPrice().toFixed(2)}*
+
+📝 *Special Instructions:*
+${formData.orderNotes || "None"}
+
+---
+Please confirm this order and provide delivery timeline.
+Thank you! 🙏`
+
+    const whatsappNumber = "+2348105834317"
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
+
+    // Simulate processing delay
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Open WhatsApp
+    window.open(whatsappUrl, "_blank")
 
     setIsProcessing(false)
     setOrderComplete(true)
     clearCart()
   }
 
-  const shippingCost = getTotalPrice() > 50 ? 0 : 9.99
-  const tax = getTotalPrice() * 0.08
-  const finalTotal = getTotalPrice() + shippingCost + tax
+  const shippingCost = getTotalPrice() > 50000 ? 0 : 2500 // Free shipping over ₦50,000
+  const finalTotal = getTotalPrice() + shippingCost
 
   if (!isOpen) return null
 
@@ -83,13 +106,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <Card className="w-full max-w-md">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <MessageCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Confirmed!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Sent!</h2>
               <p className="text-gray-600 mb-6">
-                Thank you for your purchase. You'll receive a confirmation email shortly.
+                Your order has been sent to our WhatsApp. We'll confirm your order and provide delivery details shortly.
               </p>
               <Button onClick={onClose} className="w-full bg-green-500 hover:bg-green-600">
                 Continue Shopping
@@ -107,7 +128,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto">
         <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-2xl">Checkout</CardTitle>
+            <CardTitle className="text-2xl">Checkout via WhatsApp</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -119,7 +140,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <div className="space-y-6">
                 {/* Progress Steps */}
                 <div className="flex items-center space-x-4 mb-6">
-                  {[1, 2, 3].map((stepNum) => (
+                  {[1, 2].map((stepNum) => (
                     <div key={stepNum} className="flex items-center">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -128,7 +149,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       >
                         {stepNum}
                       </div>
-                      {stepNum < 3 && (
+                      {stepNum < 2 && (
                         <div className={`w-12 h-0.5 ${step > stepNum ? "bg-green-500" : "bg-gray-200"}`} />
                       )}
                     </div>
@@ -151,6 +172,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           value={formData.firstName}
                           onChange={(e) => handleInputChange("firstName", e.target.value)}
                           placeholder="John"
+                          required
                         />
                       </div>
                       <div>
@@ -160,6 +182,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           value={formData.lastName}
                           onChange={(e) => handleInputChange("lastName", e.target.value)}
                           placeholder="Doe"
+                          required
                         />
                       </div>
                     </div>
@@ -172,31 +195,34 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         value={formData.email}
                         onChange={(e) => handleInputChange("email", e.target.value)}
                         placeholder="john@example.com"
+                        required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">Phone Number</Label>
                       <Input
                         id="phone"
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+234 801 234 5678"
+                        required
                       />
                     </div>
 
                     <div className="flex items-center gap-2 mb-4 mt-6">
                       <Truck className="w-5 h-5 text-green-500" />
-                      <h3 className="text-lg font-semibold">Shipping Address</h3>
+                      <h3 className="text-lg font-semibold">Delivery Address</h3>
                     </div>
 
                     <div>
-                      <Label htmlFor="shippingAddress">Address</Label>
+                      <Label htmlFor="shippingAddress">Street Address</Label>
                       <Input
                         id="shippingAddress"
                         value={formData.shippingAddress}
                         onChange={(e) => handleInputChange("shippingAddress", e.target.value)}
                         placeholder="123 Main Street"
+                        required
                       />
                     </div>
 
@@ -207,158 +233,111 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           id="shippingCity"
                           value={formData.shippingCity}
                           onChange={(e) => handleInputChange("shippingCity", e.target.value)}
-                          placeholder="New York"
+                          placeholder="Lagos"
+                          required
                         />
                       </div>
                       <div>
                         <Label htmlFor="shippingState">State</Label>
-                        <Input
-                          id="shippingState"
-                          value={formData.shippingState}
-                          onChange={(e) => handleInputChange("shippingState", e.target.value)}
-                          placeholder="NY"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="shippingZip">ZIP Code</Label>
-                        <Input
-                          id="shippingZip"
-                          value={formData.shippingZip}
-                          onChange={(e) => handleInputChange("shippingZip", e.target.value)}
-                          placeholder="10001"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="shippingCountry">Country</Label>
                         <Select
-                          value={formData.shippingCountry}
-                          onValueChange={(value) => handleInputChange("shippingCountry", value)}
+                          value={formData.shippingState}
+                          onValueChange={(value) => handleInputChange("shippingState", value)}
                         >
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select State" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="US">United States</SelectItem>
-                            <SelectItem value="CA">Canada</SelectItem>
-                            <SelectItem value="UK">United Kingdom</SelectItem>
+                            <SelectItem value="Lagos">Lagos</SelectItem>
+                            <SelectItem value="Abuja">Abuja</SelectItem>
+                            <SelectItem value="Kano">Kano</SelectItem>
+                            <SelectItem value="Rivers">Rivers</SelectItem>
+                            <SelectItem value="Oyo">Oyo</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
 
-                    <Button onClick={() => setStep(2)} className="w-full mt-6 bg-green-500 hover:bg-green-600">
-                      Continue to Payment
+                    <div>
+                      <Label htmlFor="shippingZip">Postal Code (Optional)</Label>
+                      <Input
+                        id="shippingZip"
+                        value={formData.shippingZip}
+                        onChange={(e) => handleInputChange("shippingZip", e.target.value)}
+                        placeholder="100001"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={() => setStep(2)}
+                      className="w-full mt-6 bg-green-500 hover:bg-green-600"
+                      disabled={
+                        !formData.firstName || !formData.lastName || !formData.phone || !formData.shippingAddress
+                      }
+                    >
+                      Continue to Review
                     </Button>
                   </div>
                 )}
 
-                {/* Step 2: Payment Information */}
+                {/* Step 2: Order Review */}
                 {step === 2 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
-                      <CreditCard className="w-5 h-5 text-green-500" />
-                      <h3 className="text-lg font-semibold">Payment Information</h3>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="cardName">Cardholder Name</Label>
-                      <Input
-                        id="cardName"
-                        value={formData.cardName}
-                        onChange={(e) => handleInputChange("cardName", e.target.value)}
-                        placeholder="John Doe"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
-                        id="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={(e) => handleInputChange("cardNumber", e.target.value)}
-                        placeholder="1234 5678 9012 3456"
-                        maxLength={19}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
-                        <Input
-                          id="expiryDate"
-                          value={formData.expiryDate}
-                          onChange={(e) => handleInputChange("expiryDate", e.target.value)}
-                          placeholder="MM/YY"
-                          maxLength={5}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          value={formData.cvv}
-                          onChange={(e) => handleInputChange("cvv", e.target.value)}
-                          placeholder="123"
-                          maxLength={4}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="orderNotes">Order Notes (Optional)</Label>
-                      <Textarea
-                        id="orderNotes"
-                        value={formData.orderNotes}
-                        onChange={(e) => handleInputChange("orderNotes", e.target.value)}
-                        placeholder="Any special instructions..."
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="flex gap-4 mt-6">
-                      <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                        Back
-                      </Button>
-                      <Button onClick={() => setStep(3)} className="flex-1 bg-green-500 hover:bg-green-600">
-                        Review Order
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Order Review */}
-                {step === 3 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Lock className="w-5 h-5 text-green-500" />
-                      <h3 className="text-lg font-semibold">Review & Place Order</h3>
+                      <MessageCircle className="w-5 h-5 text-green-500" />
+                      <h3 className="text-lg font-semibold">Review & Send to WhatsApp</h3>
                     </div>
 
                     <Card>
                       <CardContent className="p-4">
-                        <h4 className="font-semibold mb-2">Shipping Information</h4>
+                        <h4 className="font-semibold mb-2">Customer Information</h4>
                         <p className="text-sm text-gray-600">
                           {formData.firstName} {formData.lastName}
                           <br />
-                          {formData.shippingAddress}
+                          {formData.phone}
                           <br />
-                          {formData.shippingCity}, {formData.shippingState} {formData.shippingZip}
+                          {formData.email}
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardContent className="p-4">
-                        <h4 className="font-semibold mb-2">Payment Method</h4>
-                        <p className="text-sm text-gray-600">**** **** **** {formData.cardNumber.slice(-4)}</p>
+                        <h4 className="font-semibold mb-2">Delivery Address</h4>
+                        <p className="text-sm text-gray-600">
+                          {formData.shippingAddress}
+                          <br />
+                          {formData.shippingCity}, {formData.shippingState} {formData.shippingZip}
+                          <br />
+                          {formData.shippingCountry}
+                        </p>
                       </CardContent>
                     </Card>
 
+                    <div>
+                      <Label htmlFor="orderNotes">Special Instructions (Optional)</Label>
+                      <Textarea
+                        id="orderNotes"
+                        value={formData.orderNotes}
+                        onChange={(e) => handleInputChange("orderNotes", e.target.value)}
+                        placeholder="Any special delivery instructions or product preferences..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MessageCircle className="w-4 h-4 text-green-600" />
+                        <span className="font-medium text-green-800">WhatsApp Order Process</span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        Your order details will be sent to our WhatsApp business number. We'll confirm availability,
+                        provide exact pricing, and arrange delivery within Lagos.
+                      </p>
+                    </div>
+
                     <div className="flex gap-4 mt-6">
-                      <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                      <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                         Back
                       </Button>
                       <Button
@@ -366,7 +345,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         disabled={isProcessing}
                         className="flex-1 bg-green-500 hover:bg-green-600"
                       >
-                        {isProcessing ? "Processing..." : `Place Order - $${finalTotal.toFixed(2)}`}
+                        {isProcessing ? "Sending..." : `Send Order via WhatsApp`}
                       </Button>
                     </div>
                   </div>
@@ -395,7 +374,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             <h4 className="font-medium text-sm truncate">{item.name}</h4>
                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                           </div>
-                          <div className="text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</div>
+                          <div className="text-sm font-medium">₦{(item.price * item.quantity).toFixed(2)}</div>
                         </div>
                       ))}
                     </div>
@@ -403,29 +382,32 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <div className="border-t pt-4 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Subtotal ({getTotalItems()} items)</span>
-                        <span>${getTotalPrice().toFixed(2)}</span>
+                        <span>₦{getTotalPrice().toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Shipping</span>
-                        <span>{shippingCost === 0 ? "Free" : `$${shippingCost.toFixed(2)}`}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>Tax</span>
-                        <span>${tax.toFixed(2)}</span>
+                        <span>Delivery (Lagos)</span>
+                        <span>{shippingCost === 0 ? "Free" : `₦${shippingCost.toFixed(2)}`}</span>
                       </div>
                       <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                        <span>Total</span>
-                        <span className="text-green-600">${finalTotal.toFixed(2)}</span>
+                        <span>Estimated Total</span>
+                        <span className="text-green-600">₦{finalTotal.toFixed(2)}</span>
                       </div>
                     </div>
 
-                    {getTotalPrice() < 50 && (
+                    {getTotalPrice() < 50000 && (
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <p className="text-xs text-blue-700">
-                          Add ${(50 - getTotalPrice()).toFixed(2)} more for free shipping!
+                          Add ₦{(50000 - getTotalPrice()).toFixed(2)} more for free delivery!
                         </p>
                       </div>
                     )}
+
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <p className="text-xs text-yellow-700">
+                        <strong>Note:</strong> Final pricing and delivery charges will be confirmed via WhatsApp based
+                        on your location and current wholesale rates.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
